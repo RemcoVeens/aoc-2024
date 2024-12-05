@@ -1,85 +1,39 @@
+def part1(data):
+    lines = data[:]
+    lines.extend(["".join([row[i] for row in data]) for i in range(len(data[0]))])
 
-def load_and_sort()-> list[list[str]]:
-    with open("day4/data.txt","r")as f:
-        data = f.readlines()
-    data = [d.strip("\n") for d in data]
-    formated = []
-    for row in data:
-        temp= []
-        for c in row:
-            temp.append(c)
-        formated.append(temp)
-    return formated
+    def find_diagonals(grid):
+        rows, cols = len(grid), len(grid[0])
 
-def get_x_cords(data:list[list[str]])->list[list[int]]:
-    result = []
-    for i, row in enumerate(data):
-        for j ,char in enumerate(row):
-            if char =="X":
-                result.append([i,j])
-    return result
+        # from top-left to bottom-right
+        main_diagonals = {}
 
-def get_word_all_dirs(data:list[list[str]], x_cords:list[list[int]]) -> list[list[str]]:
-    all_words = []
-    for x_pos in x_cords:
-        words = []
-        try:
-            # horizontal +
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]][x_pos[1]+1],data[x_pos[0]][x_pos[1]+2],data[x_pos[0]][x_pos[1]+3]])
-        except IndexError:
-            pass
-        try:
-            # horizontal -
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]][x_pos[1]-1],data[x_pos[0]][x_pos[1]-2],data[x_pos[0]][x_pos[1]-3]])
-        except IndexError:
-            pass
-        try:
-            #vertical +
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]+1][x_pos[1]],data[x_pos[0]+2][x_pos[1]],data[x_pos[0]+3][x_pos[1]]])
-        except IndexError:
-            pass
-        try:
-            #vertical -
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]-1][x_pos[1]],data[x_pos[0]-2][x_pos[1]],data[x_pos[0]-3][x_pos[1]]])
-        except IndexError:
-            pass
-        try:
-            #diagonal + +
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]+1][x_pos[1]+1],data[x_pos[0]+2][x_pos[1]+2],data[x_pos[0]+3][x_pos[1]+3]])
-        except IndexError:
-            pass
-        # try:
-        #     #diagonal + -
-        #     words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]+1][x_pos[1]-1],data[x_pos[0]+2][x_pos[1]-2],data[x_pos[0]+3][x_pos[1]-3]])
-        # except IndexError:
-        #     pass
-        try:
-            #diagonal - +
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]-1][x_pos[1]+1],data[x_pos[0]-2][x_pos[1]+2],data[x_pos[0]-3][x_pos[1]+3]])
-        except IndexError:
-            pass
-        try:
-            #diagonal - -
-            words.append([data[x_pos[0]][x_pos[1]],data[x_pos[0]-1][x_pos[1]-1],data[x_pos[0]-2][x_pos[1]-2],data[x_pos[0]-3][x_pos[1]-3]])
-        except IndexError:
-            pass
-        all_words.append(words)
-    return all_words
+        # from top-right to bottom-left
+        anti_diagonals = {}
 
-def count_xmas(words:list[list[str]]) -> int:
-    count = 0
-    for word in words:
-        for w in word:
-            if w == ["X","M","A","S"]:
-                print(w)
-                count+=1
-    return count
+        for r in range(rows):
+            for c in range(cols):
+                key_main = r - c
+                if key_main not in main_diagonals:
+                    main_diagonals[key_main] = []
+                main_diagonals[key_main].append(grid[r][c])
+
+                key_anti = r + c
+                if key_anti not in anti_diagonals:
+                    anti_diagonals[key_anti] = []
+                anti_diagonals[key_anti].append(grid[r][c])
+
+        return main_diagonals, anti_diagonals
+
+    main_diagonals, anti_diagonals = find_diagonals(data)
+    lines.extend(["".join(i) for i in main_diagonals.values()])
+    lines.extend(["".join(i) for i in anti_diagonals.values()])
+
+    return sum(line.count("XMAS") + line.count("SAMX") for line in lines)
+
 
 if __name__ == "__main__":
-    data = load_and_sort()
-    x_cords = get_x_cords(data)
-    for i in x_cords:
-        assert data[i[0]][i[1]] =="X"
-    words = get_word_all_dirs(data, x_cords)
-    count = count_xmas(words)
-    print(count)
+    with open("day4/data.txt", "r") as f:
+        data = f.readlines()
+    data = [d.strip("\n") for d in data]
+    print(part1(data=data))
